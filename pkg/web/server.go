@@ -61,7 +61,12 @@ func (p Program) Stop(s service.Service) error {
 func (p Program) run() {
 
    router := httprouter.New()
-  
+   router.ServeFiles("/html/*filepath", http.Dir("html"))
+	router.ServeFiles("/css/*filepath", http.Dir("css"))
+	router.ServeFiles("/js/*filepath", http.Dir("js"))
+ 
+   router.GET("/", BasicAuth(Index))
+
    // get port number from env variables
    port := os.Getenv("PORT")
    if port == "" {
@@ -74,6 +79,8 @@ func (p Program) run() {
       io.LogError("WEB - run", "Problem starting web server: " + err.Error())
       os.Exit(-1)
    }
+
+   io.LogInfo("WEB - run", "service running")
 
 }
 
