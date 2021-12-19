@@ -61,9 +61,10 @@ func (p Program) Stop(s service.Service) error {
 func (p Program) run() {
 
    router := httprouter.New()
-   router.ServeFiles("/html/*filepath", http.Dir("html"))
-	router.ServeFiles("/css/*filepath", http.Dir("css"))
-	router.ServeFiles("/js/*filepath", http.Dir("js"))
+   router.ServeFiles("/html/*filepath", http.Dir("web/html"))
+	router.ServeFiles("/css/*filepath", http.Dir("web/css"))
+	router.ServeFiles("/js/*filepath", http.Dir("web/js"))
+	router.ServeFiles("/vendors/*filepath", http.Dir("web/vendors"))
  
    router.GET("/", BasicAuth(Index))
 
@@ -72,7 +73,7 @@ func (p Program) run() {
    if port == "" {
       port = "8080"
    }
-   io.LogInfo("WEB - run", "setting PORT to" + port)
+   io.LogInfo("WEB - run", "setting PORT to: " + port)
 
    err := http.ListenAndServe(":"+port, router)
    if err != nil {

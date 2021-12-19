@@ -72,7 +72,7 @@ func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Para
 
    data.Version = "0.0.1"
 
-   tmpl := template.Must(template.ParseFiles("html/index.html"))
+   tmpl := template.Must(template.ParseFiles("web/html/index.html"))
    _ = tmpl.Execute(writer, data)
    io.LogInfo("INDEX", "Page sent in "+time.Since(timer).String())
 }
