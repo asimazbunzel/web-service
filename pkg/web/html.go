@@ -5,10 +5,13 @@ import (
    "crypto/subtle"
    "html/template"
 	"net/http"
+   "os"
    "time"
 
-	"web-service/pkg/io"
+   "web-service/pkg/io"
+   "web-service/pkg/utils"
 
+   "github.com/shirou/gopsutil/host"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -21,6 +24,10 @@ var (
 
 type IndexData struct {
    Version string
+   HostName string
+   Uptime float64
+   Date string
+   CPULoad []float64
 }
 
 func BasicAuth(h httprouter.Handle) httprouter.Handle {
@@ -71,6 +78,31 @@ func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Para
    var data IndexData
 
    data.Version = "0.0.1"
+   dt := time.Now()
+   data.Date = dt.Format("01-02-2006 15:04:05")
+   hostname, err := os.Hostname()
+   if err != nil {
+      io.LogError("WEB - Index", "error getting hostname")
+      os.Exit(1)
+   }
+   data.HostName = hostname
+
+   utime, err := host.Uptime()
+   if err != nil {
+      io.LogError("WEB - Index", "error getting uptime")
+      os.Exit(1)
+   }
+
+   data.Uptime = float64(utime) / 3600
+   
+   percent := utils.GetCPUsLoad()
+   if len(percent) < 0 {
+      io.LogError("WEB - InitServer", "cannot have CPU count < 0")
+   }
+   
+   for i := 0; i < len(percent); i++ {
+      data.CPULoad = append(data.CPULoad, percent[i])
+   }
 
    tmpl := template.Must(template.ParseFiles("web/html/index.html"))
    _ = tmpl.Execute(writer, data)

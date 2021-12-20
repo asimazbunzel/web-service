@@ -103,10 +103,6 @@ func InitServer(s *ServiceInfo) {
       io.LogDebug("WEB - InitServer", "Cannot create the service: " + err.Error())
    }
 
-   percent := utils.GetCPUsLoad()
-   if len(percent) < 0 {
-      io.LogError("WEB - InitServer", "cannot have CPU count < 0")
-   }
 
    err = serv.Run()
    if err != nil {
