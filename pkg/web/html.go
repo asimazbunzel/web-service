@@ -1,18 +1,21 @@
 package web
 
 import (
-   "crypto/sha256"
-   "crypto/subtle"
-   "html/template"
+	"crypto/sha256"
+	"crypto/subtle"
+	"html/template"
 	"net/http"
-   "os"
-   "time"
+	"os"
+   "os/user"
+	"strconv"
+	"time"
 
-   "web-service/pkg/io"
-   "web-service/pkg/utils"
+	"web-service/pkg/io"
+	"web-service/pkg/utils"
 
-   "github.com/shirou/gopsutil/host"
 	"github.com/julienschmidt/httprouter"
+   "github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/host"
 )
 
 /*
@@ -25,9 +28,13 @@ var (
 type IndexData struct {
    Version string
    HostName string
-   Uptime float64
+   UserName string
+   Uptime string
+   NCores string
+   NCoresGT4 bool
+   CPUInfo string
    Date string
-   CPULoad []float64
+   CPULoad []string
 }
 
 func BasicAuth(h httprouter.Handle) httprouter.Handle {
@@ -73,7 +80,14 @@ func BasicAuth(h httprouter.Handle) httprouter.Handle {
 
 
 func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
 	timer := time.Now()
+
+   stats, err := cpu.Info()
+    if err != nil {
+      io.LogError("WEB - Index", "error getting CPU info")
+      os.Exit(1)
+    }
 
    var data IndexData
 
@@ -86,22 +100,38 @@ func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Para
       os.Exit(1)
    }
    data.HostName = hostname
+   
+   userinfo, err := user.Current()
+   if err != nil {
+      io.LogError("WEB - Index", "error getting username")
+      os.Exit(1)
+   }
+   data.UserName = userinfo.Username
 
    utime, err := host.Uptime()
    if err != nil {
       io.LogError("WEB - Index", "error getting uptime")
       os.Exit(1)
    }
-
-   data.Uptime = float64(utime) / 3600
+   ftime := float64(utime / 3600)
+   data.Uptime = strconv.FormatFloat(ftime, 'f', 2, 64)
+    
+   data.NCores = strconv.Itoa(len(stats))
+   data.CPUInfo = stats[0].ModelName
    
    percent := utils.GetCPUsLoad()
    if len(percent) < 0 {
       io.LogError("WEB - InitServer", "cannot have CPU count < 0")
    }
+
+   data.NCoresGT4 = false
+   if len(percent) > 4 {
+      data.NCoresGT4 = true
+   }
    
    for i := 0; i < len(percent); i++ {
-      data.CPULoad = append(data.CPULoad, percent[i])
+      str := strconv.FormatFloat(percent[i], 'f', 2, 64)
+      data.CPULoad = append(data.CPULoad, str)
    }
 
    tmpl := template.Must(template.ParseFiles("web/html/index.html"))

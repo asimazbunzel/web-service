@@ -8,7 +8,6 @@ import (
    "time"
 
    "web-service/pkg/io"
-   "web-service/pkg/utils"
    
    "github.com/julienschmidt/httprouter"
    "github.com/kardianos/service"
