@@ -18,12 +18,6 @@ import (
 	"github.com/shirou/gopsutil/host"
 )
 
-/*
-var (
-        cachedUsersByEmail = map[string]database.User{}
-        usersByEmailSync   sync.RWMutex
-)
-*/
 
 type IndexData struct {
    Version string
@@ -45,13 +39,6 @@ func BasicAuth(h httprouter.Handle) httprouter.Handle {
 
       io.LogDebug("WEB - BasicAuth", "username: " + username)
       io.LogDebug("WEB - BasicAuth", "password: " + password)
-
-      /*
-      usersByEmailSync.RLock()
-      user, userFound := cachedUsersByEmail[email]
-      usersByEmailSync.RUnlock()
-      userMatchesPassword := comparePasswords(user.Password, []byte(password))
-      */
 
       if hasAuth {
 
