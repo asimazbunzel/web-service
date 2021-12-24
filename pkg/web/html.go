@@ -29,6 +29,7 @@ type IndexData struct {
    CPUInfo string
    Date string
    CPULoad []string
+   CPUno []int
 }
 
 func BasicAuth(h httprouter.Handle) httprouter.Handle {
@@ -119,6 +120,7 @@ func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Para
    for i := 0; i < len(percent); i++ {
       str := strconv.FormatFloat(percent[i], 'f', 2, 64)
       data.CPULoad = append(data.CPULoad, str)
+      data.CPUno = append(data.CPUno, i)
    }
 
    tmpl := template.Must(template.ParseFiles("web/html/index.html"))
