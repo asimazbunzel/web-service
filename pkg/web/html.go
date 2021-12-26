@@ -77,11 +77,13 @@ func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Para
       os.Exit(1)
     }
 
+   // IndexData holds all the info of the server
    var data IndexData
 
    data.Version = "0.0.1"
    dt := time.Now()
    data.Date = dt.Format("01-02-2006 15:04:05")
+
    hostname, err := os.Hostname()
    if err != nil {
       io.LogError("WEB - Index", "error getting hostname")
