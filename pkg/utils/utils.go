@@ -10,7 +10,7 @@ import (
    "github.com/shirou/gopsutil/cpu"
 )
 
-func GetCPUsLoad() []float64 {
+func GetCPUsLoad () []float64 {
    
    io.LogInfo("UTILS - GetCPUsLoad", "loading CPU percentage")
    
@@ -28,5 +28,14 @@ func GetCPUsLoad() []float64 {
    }
 
    return percents
+
+}
+
+
+// search for the process id number of a MESA simulation based on
+// the name of the binary executable
+func GetMESAproc (exec_name string) int {
+
+   return -1
 
 }
