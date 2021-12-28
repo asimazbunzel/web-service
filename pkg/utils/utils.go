@@ -30,12 +30,3 @@ func GetCPUsLoad () []float64 {
    return percents
 
 }
-
-
-// search for the process id number of a MESA simulation based on
-// the name of the binary executable
-func GetMESAproc (exec_name string) int {
-
-   return -1
-
-}
