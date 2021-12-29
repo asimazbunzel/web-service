@@ -1,6 +1,7 @@
 package web
 
 import (
+   "fmt"
 	"crypto/sha256"
 	"crypto/subtle"
 	"html/template"
@@ -162,4 +163,30 @@ func Dashboard (writer http.ResponseWriter, request *http.Request, _ httprouter.
    tmpl := template.Must(template.ParseFiles("web/html/dashboard.html"))
    _ = tmpl.Execute(writer, data)
    io.LogInfo("HTML - Dashboard", "Page sent in "+time.Since(timer).String())
+
+}
+
+
+// mesa.html serving func
+func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
+   // start counting time until serve files
+   timer := time.Now()
+
+   mesa := new(utils.MESAprocess)
+   mesa.ExecName = "bin2dco"
+   mesa.WalkProc()
+   
+   if mesa.Id != 0 {
+      mesa.GetAbsPath()
+   } else {
+      mesa.Id = -99
+   }
+
+   fmt.Println(mesa.Id)
+   
+   tmpl := template.Must(template.ParseFiles("web/html/mesa.html"))
+   _ = tmpl.Execute(writer, mesa)
+   io.LogInfo("HTML - MESAhtml", "Page sent in "+time.Since(timer).String())
+
 }
