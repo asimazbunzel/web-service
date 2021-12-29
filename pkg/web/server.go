@@ -66,6 +66,8 @@ func (p Program) run() {
 	router.ServeFiles("/vendors/*filepath", http.Dir("web/vendors"))
  
    router.GET("/", BasicAuth(Index))
+   router.GET("/index", BasicAuth(Index))
+   router.GET("/dashboard", BasicAuth(Index))
 
    // get port number from env variables
    port := os.Getenv("PORT")
