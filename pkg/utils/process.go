@@ -73,11 +73,6 @@ func (M *MESAprocess) FindMESAProcess (path string, info os.FileInfo, err error)
             M.Id = pid
             M.Loc = "/proc/" + strconv.Itoa(pid)
 
-            // proc, err := os.FindProcess(pid)
-            // if err != nil {
-                // log.Println(err)
-            // }
-
             // Let's return a fake error to abort the walk through the
             // rest of the /proc directory tree
             return errors.New("found MESA process")
