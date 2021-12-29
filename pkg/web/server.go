@@ -68,7 +68,7 @@ func (p Program) run() {
    router.GET("/", BasicAuth(Index))
    router.GET("/index", BasicAuth(Index))
    router.GET("/dashboard", BasicAuth(Dashboard))
-   router.GET("/mesa", MESAhtml)
+   router.GET("/mesa", BasicAuth(MESAhtml))
 
    // get port number from env variables
    port := os.Getenv("PORT")
