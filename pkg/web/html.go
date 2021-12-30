@@ -3,6 +3,8 @@ package web
 import (
 	"crypto/sha256"
 	"crypto/subtle"
+	"fmt"
+
 	// "fmt"
 
 	"html/template"
@@ -175,18 +177,21 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
    // start counting time until serve files
    timer := time.Now()
 
+   // set struct which has tha ability to find the process running a MESA executable
    mesaProc := new(utils.MESAprocess)
-   mesaProc.ExecName = "bin2dco"
    mesaProc.WalkProc()
    
-   // first, get abs path where run is being done
+   // get abs path where run is being done, in case there is no simulation, this is simply and
+   // string
    if mesaProc.Id > 0 {
       mesaProc.GetAbsPath()
    }
 
-   // set struct with MESA info
+   // set struct with MESA info, which will later be connected to html file via Templates
    mesaInfo := new(mesa.MESAInfo)
-   binfo := new(mesa.MESAbinaryInfo)
+   bInfo := new(mesa.MESAbinaryInfo)
+   star1Info := new(mesa.MESAstarInfo)
+   star2Info := new(mesa.MESAstarInfo)
 
    // set some defaults
    mesaInfo.ProcId = mesaProc.Id
@@ -196,25 +201,67 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
    if mesaProc.Id > 0 {
 
       err := mesaInfo.LoadMESAData()
-   
+
+      // if problems while loading stuff, just set the ProcId to a reserve value so that the html
+      // will warn about it
       if err != nil {
          io.LogError("WEB - MESAhtml", "problem loading MESA data")
-         mesaInfo.ProcId = -99
+         mesaInfo.ProcId = -98
       }
-      
-      // some defaults
-      binfo.HistoryName = mesaInfo.BinaryFilename
-      binfo.MTCase = "none"
 
-      err = binfo.LoadMESAbinaryData()
+      // some defaults for MESAbinary search
+      bInfo.HistoryName = mesaInfo.BinaryFilename
+      bInfo.MTCase = "none"
+
+      // load MESAbinary info
+      err = bInfo.LoadMESAbinaryData()
+
+      // again, if problems were found, give some warning in the html
       if err != nil {
-         io.LogError("MESA - LoadMESAData", "problem loading MESAbinary data")
+         io.LogError("WEB - MESAhtml", "problem loading MESAbinary data")
+         mesaInfo.ProcId = -97
       }
 
-      mesaInfo.BinaryInfo = binfo
+      // star1 defaults
+      star1Info.HistoryName = mesaInfo.Star1Filename
+
+      // load MESAstar data for star1
+      err = star1Info.LoadMESAstarData()
+      if err != nil {
+         io.LogError("WEB - MESAhtml", "problem loading MESAstar data for star 1")
+         mesaInfo.ProcId = -96
+      }
+
+      // by default, Have2Stars is false. change accordingly to the value of point_mass_index column
+      if bInfo.PointMassIndex == 0 {
+         mesaInfo.Have2Stars = true
+      }
+
+      // star2 defaults
+      star2Info.HistoryName = mesaInfo.Star2Filename
+
+      // load MESAstar data for star2
+      err = star2Info.LoadMESAstarData()
+      if err != nil {
+         io.LogError("WEB - MESAhtml", "problem loading MESAstar data for star 2")
+         mesaInfo.ProcId = -95
+      }
+
+      // also. after having info on (possibly) both stars, check for a MT phase
+      if bInfo.DonorIndex == 1 {
+         bInfo.MTCase = mesa.SetMTCase(bInfo.RelRLOF1, star1Info.EvolState)
+      } else {
+         bInfo.MTCase = mesa.SetMTCase(bInfo.RelRLOF2, star2Info.EvolState)
+      }
+
+      // finally, store useful information inside the MESAInfo struct
+      mesaInfo.BinaryInfo = bInfo
+      mesaInfo.Star1Info  = star1Info
+      mesaInfo.Star2Info  = star2Info
 
    } else {
 
+      // this is to get the correct message in the html page
       mesaInfo.ProcId = -99
 
    }
