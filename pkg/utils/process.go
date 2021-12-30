@@ -15,6 +15,10 @@ import (
 )
 
 
+// possible names of MESA executable binaries
+var execNames = []string{"star", "binary", "bin2dco"}
+
+
 // Mp structure holds the info 
 type MESAprocess struct {
    ExecName string
@@ -22,20 +26,38 @@ type MESAprocess struct {
    Loc string
 }
 
+
 // wrapper function for searching MESA simulation process
 func (M *MESAprocess) WalkProc () {
 
-   err := filepath.Walk("/proc", M.FindMESAProcess)
-   io.LogInfo("PROCESS - Walkproc", "exiting filepath.Walk")
+   for k, name := range execNames {
 
-   if err != nil {
-      io.LogDebug("PROCESS - WalkProc", M.ExecName)
-      io.LogDebug("PROCESS - WalkProc", strconv.Itoa(M.Id))
-      return
-   } else {
-      io.LogError("PROCESS - WalkProc", "could not find MESA process")
+      M.ExecName = name
+
+      io.LogInfo("PROCESS - Walkproc", "doing filepath.Walk for name: " + name)
+      err := filepath.Walk("/proc", M.FindMESAProcess)
+
+      if err != nil {
+
+         io.LogDebug("PROCESS - WalkProc", M.ExecName)
+         io.LogDebug("PROCESS - WalkProc", strconv.Itoa(M.Id))
+
+         return
+
+      } else {
+
+         io.LogError("PROCESS - WalkProc", "could not find MESA process for name: " + name)
+
+         if (k == len(execNames)) {
+            return
+         }
+
+      }
+
    }
+
 }
+
 
 // search process with MESA simulation
 // idea from this post:
@@ -69,7 +91,7 @@ func (M *MESAprocess) FindMESAProcess (path string, info os.FileInfo, err error)
             io.LogInfo("PROCESS - FindMESAProcess", "found MESA process")
             io.LogInfo("PROCESS - FindMESAProcess", strconv.Itoa(pid))
 
-            M.ExecName = name
+            // asign PID and abs path of process
             M.Id = pid
             M.Loc = "/proc/" + strconv.Itoa(pid)
 
@@ -99,7 +121,9 @@ func (M *MESAprocess) GetAbsPath () {
    last := res1[len(res1)-1]
 
    // strip from newline char
-   M.Loc = strings.Replace(last, "\n", "", -1)
+   last2 := strings.Replace(last, "\n", "", -1)
+   last2 = last2[:len(last2) - len(M.ExecName)]
+   M.Loc = last2
 
    io.LogDebug("PROCESS - GetAbsPath", "found AbsPath on " + M.Loc)
 
