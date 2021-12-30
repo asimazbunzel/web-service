@@ -1,21 +1,23 @@
 package web
 
 import (
-   "fmt"
 	"crypto/sha256"
 	"crypto/subtle"
+	// "fmt"
+
 	"html/template"
 	"net/http"
 	"os"
-   "os/user"
+	"os/user"
 	"strconv"
 	"time"
 
 	"web-service/pkg/io"
+	"web-service/pkg/mesa"
 	"web-service/pkg/utils"
 
 	"github.com/julienschmidt/httprouter"
-   "github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
 )
 
@@ -173,20 +175,53 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
    // start counting time until serve files
    timer := time.Now()
 
-   mesa := new(utils.MESAprocess)
-   mesa.ExecName = "bin2dco"
-   mesa.WalkProc()
+   mesaProc := new(utils.MESAprocess)
+   mesaProc.ExecName = "bin2dco"
+   mesaProc.WalkProc()
    
-   if mesa.Id != 0 {
-      mesa.GetAbsPath()
-   } else {
-      mesa.Id = -99
+   // first, get abs path where run is being done
+   if mesaProc.Id > 0 {
+      mesaProc.GetAbsPath()
    }
 
-   fmt.Println(mesa.Id)
+   // set struct with MESA info
+   mesaInfo := new(mesa.MESAInfo)
+   binfo := new(mesa.MESAbinaryInfo)
+
+   // set some defaults
+   mesaInfo.ProcId = mesaProc.Id
+   mesaInfo.RootDir = mesaProc.Loc
+
+   // load all the info on the binary run
+   if mesaProc.Id > 0 {
+
+      err := mesaInfo.LoadMESAData()
    
+      if err != nil {
+         io.LogError("WEB - MESAhtml", "problem loading MESA data")
+         mesaInfo.ProcId = -99
+      }
+      
+      // some defaults
+      binfo.HistoryName = mesaInfo.BinaryFilename
+      binfo.MTCase = "none"
+
+      err = binfo.LoadMESAbinaryData()
+      if err != nil {
+         io.LogError("MESA - LoadMESAData", "problem loading MESAbinary data")
+      }
+
+      mesaInfo.BinaryInfo = binfo
+
+   } else {
+
+      mesaInfo.ProcId = -99
+
+   }
+
+   // server html
    tmpl := template.Must(template.ParseFiles("web/html/mesa.html"))
-   _ = tmpl.Execute(writer, mesa)
+   _ = tmpl.Execute(writer, mesaInfo)
    io.LogInfo("HTML - MESAhtml", "Page sent in "+time.Since(timer).String())
 
 }
