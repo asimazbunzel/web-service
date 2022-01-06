@@ -66,7 +66,6 @@ type MESAInfo struct {
    IsBinaryEvolution bool
 }
 
-
 // get useful information of a MESA run
 func (m *MESAInfo) LoadMESAData () error {
    
@@ -79,18 +78,17 @@ func (m *MESAInfo) LoadMESAData () error {
    // star + point-mass simulations
    err := m.getLogNames()
    if err != nil {
-      io.LogError("MESA - LoadMESAData", "problem getting LOGS names")
+      io.LogError("MESA - mesa.go - LoadMESAData", "problem getting LOGS names")
    }
 
    return nil
 
 }
 
-
 // return logs names from MESA folder
 func (m *MESAInfo) getLogNames () error {
 
-   io.LogInfo("MESA - getLogNames", "searching for MESA LOGS filename(s)")
+   io.LogInfo("MESA - mesa.go - getLogNames", "searching for MESA LOGS filename(s)")
 
    binaryLogName := ""
    star1LogName := ""
@@ -106,10 +104,10 @@ func (m *MESAInfo) getLogNames () error {
          binaryLogName = fmt.Sprintf("%s%s/%s", m.RootDir, binaryLogDirectory, binaryHistoryName)
          _, err = os.Stat(binaryLogName)
          if err != nil {
-            io.LogError("MESA - getLogNames", "cannot find binary LOG output file")
+            io.LogError("MESA - mesa.go - getLogNames", "cannot find binary LOG output file")
          }
       }
-      io.LogInfo("MESA - getLogNames", "found binary output: " + binaryLogName)
+      io.LogInfo("MESA - mesa.go - getLogNames", "found binary output: " + binaryLogName)
 
       // now look for star 1 data
       star1LogName = fmt.Sprintf("%s%s/%s", m.RootDir, starLogDirectory, starHistoryName)
@@ -124,12 +122,12 @@ func (m *MESAInfo) getLogNames () error {
                star1LogName = fmt.Sprintf("%s%s/%s", m.RootDir, "LOGS_companion", starHistoryName)
                _, err = os.Stat(star1LogName)
                if err != nil {
-                  io.LogError("MESA - getLogNames", "cannot find star 1 LOG output file")
+                  io.LogError("MESA - mesa.go - getLogNames", "cannot find star 1 LOG output file")
                }
             }
          }
       }
-      io.LogInfo("MESA - getLogNames", "found star 1 output: " + star1LogName)
+      io.LogInfo("MESA - mesa.go - getLogNames", "found star 1 output: " + star1LogName)
 
       // now look for star 2 data (though not always found if doing star + point-mass)
       star2LogName = fmt.Sprintf("%s%s/%s", m.RootDir, star2LogDirectory, starHistoryName)
@@ -138,13 +136,13 @@ func (m *MESAInfo) getLogNames () error {
          star2LogName = fmt.Sprintf("%s%s/%s", m.RootDir, star2LogDirectory, "secondary_history.data")
          _, err = os.Stat(star2LogName)
          if err != nil {
-            io.LogInfo("MESA - getLogNames", "cannot find star 2 LOG output file. maybe doing star + point-mass evolution")
+            io.LogInfo("MESA - mesa.go - getLogNames", "cannot find star 2 LOG output file. maybe doing star + point-mass evolution")
             star2LogName = ""
          } else {
-            io.LogInfo("MESA - getLogNames", "found star 2 output: " + star2LogName)
+            io.LogInfo("MESA - mesa.go - getLogNames", "found star 2 output: " + star2LogName)
          }
       } else {
-         io.LogInfo("MESA - getLogNames", "found star 2 output: " + star2LogName)
+         io.LogInfo("MESA - mesa.go - getLogNames", "found star 2 output: " + star2LogName)
       }
 
    } else {
@@ -154,10 +152,10 @@ func (m *MESAInfo) getLogNames () error {
 
       _, err := os.Stat(star1LogName)
       if err != nil {
-         io.LogError("MESA - getLogNames", "cannot find star LOG output file of single evolution")
+         io.LogError("MESA - mesa.go - getLogNames", "cannot find star LOG output file of single evolution")
       }
 
-      io.LogInfo("MESA - getLogNames", "found single evolution output: " + star1LogName)
+      io.LogInfo("MESA - mesa.go - getLogNames", "found single evolution output: " + star1LogName)
    }
 
    // update struct with LOG filenames
@@ -168,7 +166,6 @@ func (m *MESAInfo) getLogNames () error {
    return nil
 
 }
-
 
 // get useful information for the summary of a MESAstar run
 func (s *MESAstarInfo) LoadMESAstarData () error {
@@ -181,7 +178,7 @@ func (s *MESAstarInfo) LoadMESAstarData () error {
     // open star file
    fstar, err := os.Open(s.HistoryName)
    if err != nil {
-      io.LogError("MESA - loadMESAstarData", "problem opening star data file")
+      io.LogError("MESA - mesa.go - loadMESAstarData", "problem opening star data file")
       return nil
    }
    defer fstar.Close()
@@ -351,14 +348,13 @@ func (s *MESAstarInfo) LoadMESAstarData () error {
    s.EvolState = SetEvolutionaryStage(s.Mass, s.CenterH1, s.CenterHe4, s.LogTcntr)
 
    if err := scanner.Err(); err != nil {
-      io.LogError("MESA - loadMESAstarData", "problem while scanning binary data file")
+      io.LogError("MESA - mesa.go - loadMESAstarData", "problem while scanning binary data file")
       return nil
    }
 
    return nil
 
 }
-
 
 // get useful information for the summary of a MESAbinary run
 func (b *MESAbinaryInfo) LoadMESAbinaryData () error {
@@ -371,7 +367,7 @@ func (b *MESAbinaryInfo) LoadMESAbinaryData () error {
    // open binary file
    fbinary, err := os.Open(b.HistoryName)
    if err != nil {
-      io.LogError("MESA - loadMESAbinaryData", "problem opening binary data file")
+      io.LogError("MESA - mesa.go - loadMESAbinaryData", "problem opening binary data file")
       return nil
    }
    defer fbinary.Close()
@@ -530,7 +526,7 @@ func (b *MESAbinaryInfo) LoadMESAbinaryData () error {
    }
 
    if err := scanner.Err(); err != nil {
-      io.LogError("MESA - loadMESAbinaryData", "problem while scanning binary data file")
+      io.LogError("MESA - mesa.go - loadMESAbinaryData", "problem while scanning binary data file")
       return nil
    }
 

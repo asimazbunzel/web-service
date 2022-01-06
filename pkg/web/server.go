@@ -35,7 +35,7 @@ type Program struct{}
 
 // Program method to start service
 func (p Program) Start(s service.Service) error {
-   io.LogDebug("WEB - Start", s.String() + " started")
+   io.LogDebug("WEB - server.go - Start", s.String() + " started")
    writingSync.Lock()
    serviceIsRunning = true
    writingSync.Unlock()
@@ -49,15 +49,17 @@ func (p Program) Stop(s service.Service) error {
    serviceIsRunning = false
    writingSync.Unlock()
    for programIsRunning {
-      io.LogDebug("WEB - Stop", s.String() + " stopping...")
+      io.LogDebug("WEB - server.go - Stop", s.String() + " stopping...")
       time.Sleep(5 * time.Second)
    }
-   io.LogDebug("WEB - Stop", s.String() + " stopped")
+   io.LogDebug("WEB - server.go - Stop", s.String() + " stopped")
    return nil
 }
 
 // Program method that runs service
 func (p Program) run() {
+
+   io.LogDebug("WEB - server.go - run", "serving web files")
 
    router := httprouter.New()
    router.ServeFiles("/html/*filepath", http.Dir("web/html"))
@@ -75,15 +77,15 @@ func (p Program) run() {
    if port == "" {
       port = "8080"
    }
-   io.LogInfo("WEB - run", "setting PORT to: " + port)
+   io.LogInfo("WEB - server.go - run", "setting PORT to: " + port)
 
    err := http.ListenAndServe(":"+port, router)
    if err != nil {
-      io.LogError("WEB - run", "Problem starting web server: " + err.Error())
+      io.LogError("WEB - server.go - run", "problem starting web server: " + err.Error())
       os.Exit(-1)
    }
 
-   io.LogInfo("WEB - run", "service running")
+   io.LogInfo("WEB - server.go - run", "service running")
 
 }
 
@@ -99,15 +101,15 @@ func InitServer(s *ServiceInfo) {
    }
 
    prg := &Program{}
-   
+
    serv, err := service.New(prg, serviceConfig)
    if err != nil {
-      io.LogDebug("WEB - InitServer", "Cannot create the service: " + err.Error())
+      io.LogDebug("WEB - server.go - InitServer", "cannot create the service: " + err.Error())
    }
 
 
    err = serv.Run()
    if err != nil {
-      io.LogDebug("WEB - InitServer", "Cannot start the service: " + err.Error())
+      io.LogDebug("WEB - server.go - InitServer", "cannot start the service: " + err.Error())
    }
 }

@@ -34,19 +34,19 @@ func (M *MESAprocess) WalkProc () {
 
       M.ExecName = name
 
-      io.LogInfo("PROCESS - Walkproc", "doing filepath.Walk for name: " + name)
+      io.LogInfo("UTILS - process.go - Walkproc", "doing filepath.Walk for name: " + name)
       err := filepath.Walk("/proc", M.FindMESAProcess)
 
       if err != nil {
 
-         io.LogDebug("PROCESS - WalkProc", M.ExecName)
-         io.LogDebug("PROCESS - WalkProc", strconv.Itoa(M.Id))
+         io.LogDebug("UTILS - process.go - WalkProc", M.ExecName)
+         io.LogDebug("UTILS - process.go - WalkProc", strconv.Itoa(M.Id))
 
          return
 
       } else {
 
-         io.LogError("PROCESS - WalkProc", "could not find MESA process for name: " + name)
+         io.LogError("UTILS - process.go - WalkProc", "could not find MESA process for name: " + name)
 
          if (k == len(execNames)) {
             return
@@ -74,13 +74,13 @@ func (M *MESAprocess) FindMESAProcess (path string, info os.FileInfo, err error)
 
          pid, err := strconv.Atoi(path[6:strings.LastIndex(path, "/")])
          if err != nil {
-            io.LogInfo("PROCESS - FindMESAProcess", "problem converting Atoi")
+            io.LogInfo("UTILS - process.go - FindMESAProcess", "problem converting Atoi")
             return nil
          }
 
          f, err := ioutil.ReadFile(path)
          if err != nil {
-            io.LogInfo("PROCESS - FindMESAProcess", "problem reading status file")
+            io.LogInfo("UTILS - process.go - FindMESAProcess", "problem reading status file")
             return nil
          }
 
@@ -88,8 +88,8 @@ func (M *MESAprocess) FindMESAProcess (path string, info os.FileInfo, err error)
          name := string(f[6:bytes.IndexByte(f, '\n')])
          if name == M.ExecName {
 
-            io.LogInfo("PROCESS - FindMESAProcess", "found MESA process")
-            io.LogInfo("PROCESS - FindMESAProcess", strconv.Itoa(pid))
+            io.LogInfo("UTILS - process.go - FindMESAProcess", "found MESA process")
+            io.LogInfo("UTILS - process.go - FindMESAProcess", strconv.Itoa(pid))
 
             // asign PID and abs path of process
             M.Id = pid

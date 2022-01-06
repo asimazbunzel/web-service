@@ -3,10 +3,7 @@ package web
 import (
 	"crypto/sha256"
 	"crypto/subtle"
-	"fmt"
-
 	// "fmt"
-
 	"html/template"
 	"net/http"
 	"os"
@@ -24,6 +21,7 @@ import (
 )
 
 
+// struct with info to print in index & dashboard pages
 type IndexData struct {
    Version string
    HostName string
@@ -37,6 +35,7 @@ type IndexData struct {
    CPUno []int
 }
 
+// method to get all the info for IndexData
 func (Data *IndexData) GetIndexData () error {
 
    Data.Version = "0.0.1"
@@ -44,7 +43,7 @@ func (Data *IndexData) GetIndexData () error {
    // get CPU info
    stats, err := cpu.Info()
     if err != nil {
-      io.LogError("HTML - GetIndexData", "error getting CPU info")
+      io.LogError("WEB - html.go - GetIndexData", "error getting CPU info")
       os.Exit(1)
     }
    
@@ -55,7 +54,7 @@ func (Data *IndexData) GetIndexData () error {
    // hostname
    hostname, err := os.Hostname()
    if err != nil {
-      io.LogError("HTML - GetIndexData", "error getting hostname")
+      io.LogError("WEB - html.go - GetIndexData", "error getting hostname")
       os.Exit(1)
    }
    Data.HostName = hostname
@@ -63,7 +62,7 @@ func (Data *IndexData) GetIndexData () error {
    // info on the user running the server
    userinfo, err := user.Current()
    if err != nil {
-      io.LogError("HTML - GetIndexData", "error getting username")
+      io.LogError("WEB - html.go - GetIndexData", "error getting username")
       os.Exit(1)
    }
    Data.UserName = userinfo.Username
@@ -71,7 +70,7 @@ func (Data *IndexData) GetIndexData () error {
    // time server has been up
    utime, err := host.Uptime()
    if err != nil {
-      io.LogError("HTML - GetIndexData", "error getting uptime")
+      io.LogError("WEB - html.go - GetIndexData", "error getting uptime")
       os.Exit(1)
    }
    ftime := float64(utime / 3600)
@@ -84,14 +83,14 @@ func (Data *IndexData) GetIndexData () error {
    // CPU load
    percent := utils.GetCPUsLoad()
    if len(percent) < 0 {
-      io.LogError("HTML - GetIndexData", "cannot have CPU count < 0")
+      io.LogError("WEB - html.go - GetIndexData", "cannot have CPU count < 0")
    }
 
    Data.NCoresGT4 = false
    if len(percent) > 4 {
       Data.NCoresGT4 = true
    }
-   
+
    for i := 0; i < len(percent); i++ {
       str := strconv.FormatFloat(percent[i], 'f', 2, 64)
       Data.CPULoad = append(Data.CPULoad, str)
@@ -101,14 +100,16 @@ func (Data *IndexData) GetIndexData () error {
    return nil
 }
 
+
+// some basic layer of auth
 func BasicAuth(h httprouter.Handle) httprouter.Handle {
-   
+
    return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
       username, password, hasAuth := request.BasicAuth()
 
-      io.LogDebug("HTML - BasicAuth", "username: " + username)
-      io.LogDebug("HTML - BasicAuth", "password: " + password)
+      io.LogDebug("WEB - html.go - BasicAuth", "username: " + username)
+      io.LogDebug("WEB - html.go - BasicAuth", "password: " + password)
 
       if hasAuth {
 
@@ -149,7 +150,7 @@ func Index (writer http.ResponseWriter, request *http.Request, _ httprouter.Para
    // serve index.html
    tmpl := template.Must(template.ParseFiles("web/html/index.html"))
    _ = tmpl.Execute(writer, data)
-   io.LogInfo("HTML - Index", "Page sent in "+time.Since(timer).String())
+   io.LogInfo("WEB - html.go - Index", "page sent in "+time.Since(timer).String())
 
 }
 
@@ -166,7 +167,7 @@ func Dashboard (writer http.ResponseWriter, request *http.Request, _ httprouter.
 
    tmpl := template.Must(template.ParseFiles("web/html/dashboard.html"))
    _ = tmpl.Execute(writer, data)
-   io.LogInfo("HTML - Dashboard", "Page sent in "+time.Since(timer).String())
+   io.LogInfo("WEB - html.go - Dashboard", "page sent in "+time.Since(timer).String())
 
 }
 
@@ -205,7 +206,7 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
       // if problems while loading stuff, just set the ProcId to a reserve value so that the html
       // will warn about it
       if err != nil {
-         io.LogError("WEB - MESAhtml", "problem loading MESA data")
+         io.LogError("WEB - html.go - MESAhtml", "problem loading MESA data")
          mesaInfo.ProcId = -98
       }
 
@@ -218,7 +219,7 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
 
       // again, if problems were found, give some warning in the html
       if err != nil {
-         io.LogError("WEB - MESAhtml", "problem loading MESAbinary data")
+         io.LogError("WEB - html.go - MESAhtml", "problem loading MESAbinary data")
          mesaInfo.ProcId = -97
       }
 
@@ -228,7 +229,7 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
       // load MESAstar data for star1
       err = star1Info.LoadMESAstarData()
       if err != nil {
-         io.LogError("WEB - MESAhtml", "problem loading MESAstar data for star 1")
+         io.LogError("WEB - html.go - MESAhtml", "problem loading MESAstar data for star 1")
          mesaInfo.ProcId = -96
       }
 
@@ -243,7 +244,7 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
       // load MESAstar data for star2
       err = star2Info.LoadMESAstarData()
       if err != nil {
-         io.LogError("WEB - MESAhtml", "problem loading MESAstar data for star 2")
+         io.LogError("WEB - html.go - MESAhtml", "problem loading MESAstar data for star 2")
          mesaInfo.ProcId = -95
       }
 
@@ -269,6 +270,6 @@ func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.P
    // server html
    tmpl := template.Must(template.ParseFiles("web/html/mesa.html"))
    _ = tmpl.Execute(writer, mesaInfo)
-   io.LogInfo("HTML - MESAhtml", "Page sent in "+time.Since(timer).String())
+   io.LogInfo("WEB - html.go - MESAhtml", "page sent in "+time.Since(timer).String())
 
 }

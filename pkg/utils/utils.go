@@ -12,7 +12,7 @@ import (
 
 func GetCPUsLoad () []float64 {
    
-   io.LogInfo("UTILS - GetCPUsLoad", "loading CPU percentage")
+   io.LogInfo("UTILS - utils.go - GetCPUsLoad", "loading CPU percentage")
    
    percents, _ := cpu.Percent(time.Second, true)
 
@@ -23,7 +23,7 @@ func GetCPUsLoad () []float64 {
       percent_val := strconv.FormatFloat(percents[i], 'f', -1, 64)
       dbg_string := "CPU " + cpu_val + ": " + percent_val
    
-      io.LogDebug("UTILS - GetCPUsLoad", dbg_string)
+      io.LogDebug("UTILS - utils.go - GetCPUsLoad", dbg_string)
 
    }
 
