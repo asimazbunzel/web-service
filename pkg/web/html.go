@@ -172,6 +172,13 @@ func Dashboard (writer http.ResponseWriter, request *http.Request, _ httprouter.
 }
 
 
+// favicon.ico func
+func Favicon (writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
+   http.ServeFile(writer, request, "web/images/favicon.ico")
+}
+
+
 // mesa.html serving func
 func MESAhtml (writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
