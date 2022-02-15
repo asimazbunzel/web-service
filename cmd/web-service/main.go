@@ -2,7 +2,7 @@
 package main
 
 import (
-
+   
    "web-service/pkg/io"
    "web-service/pkg/web"
 
@@ -16,7 +16,7 @@ const version = "2021.12.2.1"
 
 func main() {
 
-   io.LogInfo("MAIN - main", serviceName)
+   io.LogInfo("MAIN - main.go - main", serviceName)
 
 
    // Struct with information of the service
@@ -27,6 +27,7 @@ func main() {
 
 
    // Initialize service
+   io.LogInfo("MAIN - main.go - main", "initializing service")
    web.InitServer(Info)
 
 }
