@@ -63,9 +63,9 @@ func (p Program) run() {
 
    router := httprouter.New()
    router.ServeFiles("/html/*filepath", http.Dir("web/html"))
-	router.ServeFiles("/css/*filepath", http.Dir("web/css"))
-	router.ServeFiles("/js/*filepath", http.Dir("web/js"))
-	router.ServeFiles("/vendors/*filepath", http.Dir("web/vendors"))
+   router.ServeFiles("/css/*filepath", http.Dir("web/css"))
+   router.ServeFiles("/js/*filepath", http.Dir("web/js"))
+   router.ServeFiles("/vendors/*filepath", http.Dir("web/vendors"))
  
    router.GET("/", BasicAuth(Index))
    router.GET("/index", BasicAuth(Index))
