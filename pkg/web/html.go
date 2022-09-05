@@ -111,12 +111,15 @@ func BasicAuth(h httprouter.Handle) httprouter.Handle {
       io.LogDebug("WEB - html.go - BasicAuth", "username: " + username)
       io.LogDebug("WEB - html.go - BasicAuth", "password: " + password)
 
+      username = os.Getenv("SERVER_AUTH_USERNAME")
+      password = os.Getenv("SERVER_AUTH_PASSWORD")
+
       if hasAuth {
 
          usernameHash := sha256.Sum256([]byte(username))
          passwordHash := sha256.Sum256([]byte(password))
-         expectedUsernameHash := sha256.Sum256([]byte("test"))
-         expectedPasswordHash := sha256.Sum256([]byte("1010"))
+         expectedUsernameHash := sha256.Sum256([]byte(username))
+         expectedPasswordHash := sha256.Sum256([]byte(password))
 
          usernameMatch := (subtle.ConstantTimeCompare(usernameHash[:], expectedUsernameHash[:]) == 1)
          passwordMatch := (subtle.ConstantTimeCompare(passwordHash[:], expectedPasswordHash[:]) == 1)
